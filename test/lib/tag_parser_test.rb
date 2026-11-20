@@ -512,6 +512,16 @@ class TagParserTest < ActiveSupport::TestCase
     assert_equal "https://resultmaps.neis-one.org/osm-changesets?comment=maproulette", url
   end
 
+  def test_tag2link_preserves_plus_in_opening_hours
+    value = "easter -6 days-easter +6 days off; easter +51 days off"
+    links = TagParser.parse_value("opening_hours", value)
+
+    assert_equal 1, links.length
+    assert_equal value, links.first[:text]
+    query = URI.decode_www_form(links.first[:url].partition("?").last).to_h
+    assert_equal value, query["EXP"]
+  end
+
   def test_build_tag2link_dict_rejects_deprecated_and_third_party
     data = [
       { "key" => "Key:example", "url" => "http://example.com/$1", "rank" => "deprecated", "source" => "osmwiki:P8" },

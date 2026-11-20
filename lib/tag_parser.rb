@@ -121,7 +121,13 @@ module TagParser
     url_template = @tag2link_dict[key]
     return { :text => RichText.auto_link(value) } unless url_template
 
-    link = url_template.gsub("$1", value.sub(/^#/, ""))
+    link_value = value.sub(/^#/, "")
+    target, fragment_separator, fragment = url_template.partition("#")
+    path, query_separator, query = target.partition("?")
+
+    link = path.gsub("$1", link_value) + query_separator +
+           query.gsub("$1", link_value.gsub("+", "%2B")) + fragment_separator +
+           fragment.gsub("$1", link_value)
     { :text => value, :url => link, :type => :tag2link_link, :key => key }
   end
 
